@@ -26,33 +26,23 @@ $data = json_decode($response, true);
 
 $products = $data['products'];
 
-// $affiliateProducts = [];
-
-$result = 'id,title,description,link,availability,price,brand,gtin,mpn,condition' . "\n";
+$affiliateProducts = [];
 
 foreach ($products as $product) {
-	$temp_line = $product['variants'][0]['sku'] . "," . $product['title'] . "," . $product['body_html'] . "," . 'https://www.littleliffner.com/products/'.$product['handle']
-				. "," . ($product['variants'][0]['inventory_quantity'] == 0 ? 'out of stock' : 'in stock') . "," . $product['variants'][0]['price']
-				. ',,,,refurbished' . "\n";
-	$result .= $temp_line;
-	// $affiliateProduct = [
-	// 	'id' => $product['variants'][0]['sku'],
-	// 	'title' => $product['title'],
-	// 	'description' => $product['body_html'],
-	// 	'link' => 'https://www.littleliffner.com/products/'.$product['handle'],
-	// 	'availability' => $product['variants'][0]['inventory_quantity'] == 0 ? 'out of stock' : 'in stock',
-	// 	'price' => $product['variants'][0]['price'],
-	// 	'brand' => '',
-	// 	'gtin' => '',
-	// 	'mpn' => '',
-	// 	'condition' => 'refurbished'
-	// ];
+	$affiliateProduct = [
+		'id' => $product['variants'][0]['sku'],
+		'title' => $product['title'],
+		'description' => $product['body_html'],
+		'link' => 'https://www.littleliffner.com/products/'.$product['handle'],
+		'availability' => $product['variants'][0]['inventory_quantity'] == 0 ? 'out of stock' : 'in stock',
+		'price' => $product['variants'][0]['price'],
+		'brand' => '',
+		'gtin' => '',
+		'mpn' => '',
+		'condition' => 'refurbished'
+	];
 
-	// $affiliateProducts[] = $affiliateProduct;
+	$affiliateProducts[] = $affiliateProduct;
 }
 
-// echo json_encode($affiliateProducts);
-$file_path = 'file.txt';
-// Write the content to the file
-file_put_contents($file_path, $result);
-echo $result;
+echo json_encode($affiliateProducts);

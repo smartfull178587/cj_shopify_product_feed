@@ -26,23 +26,33 @@ $data = json_decode($response, true);
 
 $products = $data['products'];
 
-$affiliateProducts = [];
+$csv_result = 'id' . ',' . 
+			  'title' . ',' .
+			  'description' . ',' .
+			  'link' . ',' .
+			  'availability' . ',' .
+			  'price' . ',' .
+			  'brand' . ',' .
+			  'gtin' . ',' .
+			  'mpn' . ',' .
+			  'condition' . PHP_EOL;
 
 foreach ($products as $product) {
-	$affiliateProduct = [
-		'id' => $product['variants'][0]['sku'],
-		'title' => $product['title'],
-		'description' => $product['body_html'],
-		'link' => 'https://www.littleliffner.com/products/'.$product['handle'],
-		'availability' => $product['variants'][0]['inventory_quantity'] == 0 ? 'out of stock' : 'in stock',
-		'price' => $product['variants'][0]['price'],
-		'brand' => '',
-		'gtin' => '',
-		'mpn' => '',
-		'condition' => 'refurbished'
-	];
-
-	$affiliateProducts[] = $affiliateProduct;
+	$temp_line = $product['variants'][0]['sku'] . ',' .
+				 $product['title'] . ',' .
+				 'description' . ',' .
+				//  str_replace(["\r", "\n", "\t"], '', $product['body_html']) . ',' .
+				 'https://www.littleliffner.com/products/'.$product['handle'] . ',' .
+				 ($product['variants'][0]['inventory_quantity'] == 0 ? 'out of stock' : 'in stock') . ',' .
+				 $product['variants'][0]['price'] . ',' .
+				 '' . ',' .
+				 '' . ',' .
+				 '' . ',' .
+				 'refurbished' . PHP_EOL;
+	$csv_result .= $temp_line;
 }
 
-echo json_encode($affiliateProducts);
+$file = 'file.csv';
+file_put_contents($file, $csv_result);
+
+echo $csv_result;

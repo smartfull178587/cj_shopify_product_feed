@@ -5,7 +5,7 @@ $index = 0;
 while (true) {
 	$index++;
 	echo $index;
-	sleep(20);
+	sleep(60);
 	$store_name = 'littleliffner';
 	$access_token = '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';
 	

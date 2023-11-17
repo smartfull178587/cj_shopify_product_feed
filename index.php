@@ -82,7 +82,7 @@ echo $csv_result;
 
 curl_close($curl);
 
-logToFile("cronjob testing start");
+logToFile("cronjob testing end");
 
 function logToFile($txt) {
 	$log_file = "log_file.txt";

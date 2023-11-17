@@ -89,13 +89,12 @@ function logToFile($txt) {
 	if (file_exists($log_file)) {
 		$log_file_handle = fopen($log_file, "a");
 	} else {
-		echo 'file write';
 		$log_file_handle = fopen($log_file, "w");
-		echo 'writed';
 	}
 
 	$date = new DateTime();
 	$date = $date->format("y:m:d h:i:s");
 
 	fwrite($log_file_handle, '['.$date.'] '.$txt.PHP_EOL);
+	fclose($log_file_handle);
 }

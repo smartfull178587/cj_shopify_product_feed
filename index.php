@@ -91,6 +91,7 @@ function logToFile($txt) {
 	} else {
 		echo 'file write';
 		$log_file_handle = fopen($log_file, "w");
+		echo 'writed';
 	}
 
 	$date = new DateTime();

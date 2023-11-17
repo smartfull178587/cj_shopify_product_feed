@@ -1,8 +1,6 @@
 <?php
 
-fopen('file.txt', "w");
 logToFile("cronjob testing");
-exit;
 $curl = curl_init();
 
 $store_name = 'littleliffner';

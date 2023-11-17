@@ -94,7 +94,7 @@ while (true) {
 	$file = 'product_feed.csv';
 	file_put_contents($file, $csv_result);
 	echo $csv_result;
-	// sleep(1 * 60 * 60);
+	sleep(1 * 60 * 60);
 }
 
 curl_close($curl);

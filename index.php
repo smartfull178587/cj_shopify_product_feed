@@ -1,6 +1,6 @@
 <?php
 
-logToFile("cronjob testing");
+logToFile("cronjob testing start");
 $curl = curl_init();
 
 $store_name = 'littleliffner';
@@ -81,6 +81,8 @@ file_put_contents($file, $csv_result);
 echo $csv_result;
 
 curl_close($curl);
+
+logToFile("cronjob testing start");
 
 function logToFile($txt) {
 	$log_file = "log_file.txt";

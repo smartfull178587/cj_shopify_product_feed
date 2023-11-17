@@ -1,17 +1,7 @@
 <?php
 
-$txt = 'apple';
-
-$log_file = "log_file.log";
-$log_file_handle = fopen($log_file, "a");
-
-$date = new DateTime();
-$date = $date->format("y:m:d h:i:s");
-
-fwrite($log_file_handle, '['.$date.'] '.$txt.PHP_EOL);
-exit;
-
 logToFile("cronjob testing");
+exit;
 $curl = curl_init();
 
 $store_name = 'littleliffner';
@@ -95,7 +85,7 @@ curl_close($curl);
 
 function logToFile($txt) {
 	$log_file = "log_file.log";
-	$log_file_handle = fopen($log_file, "a");
+	$log_file_handle = fopen($log_file, "a+");
 
 	$date = new DateTime();
 	$date = $date->format("y:m:d h:i:s");

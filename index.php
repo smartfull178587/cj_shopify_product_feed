@@ -84,7 +84,7 @@ echo $csv_result;
 curl_close($curl);
 
 function logToFile($txt) {
-	$log_file = "./log_file.log";
+	$log_file = "log_file.txt";
 	$log_file_handle = null;
 	if (file_exists($log_file)) {
 		$log_file_handle = fopen($log_file, "a");

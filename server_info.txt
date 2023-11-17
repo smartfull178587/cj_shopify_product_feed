@@ -1,0 +1,7 @@
+164.90.221.124
+root / MontBlanc!@#456
+
+ftp user info
+username: ftpuser
+fullname: Admin
+password: amazing

@@ -1,0 +1,98 @@
+[
+    {
+        "id":6977060503645,
+        "title":"Assembly Chain Bracelet",
+        "body_html":"\u003cmeta charset=\"utf-8\"\u003e\n\u003cp data-mce-fragment=\"1\"\u003e\u003cspan style=\"color: #f8f5f0;\"\u003eAssembly Chain Bracelet\u003c\/span\u003e\u003c\/p\u003e",
+        "vendor":"Little Liffner",
+        "product_type":"Assembly Chain Bracelet",
+        "created_at":"2022-10-31T15:28:53+01:00",
+        "handle":"assembly-chain-bracelet",
+        "updated_at":"2023-10-09T16:37:30+02:00",
+        "published_at":"2022-11-08T17:35:30+01:00",
+        "template_suffix":"",
+        "published_scope":"web",
+        "tags":"color_silver",
+        "status":"active",
+        "admin_graphql_api_id":"gid:\/\/shopify\/Product\/6977060503645",
+        "variants":[
+            {
+                "id":40659070779485,
+                "product_id":6977060503645,
+                "title":"Default Title",
+                "price":"7900.00",
+                "sku":"SBSV7183",
+                "position":1,
+                "inventory_policy":"deny",
+                "compare_at_price":null,
+                "fulfillment_service":"manual",
+                "inventory_management":"shopify",
+                "option1":"Default Title",
+                "option2":null,
+                "option3":null,
+                "created_at":"2022-10-31T15:28:53+01:00",
+                "updated_at":"2023-10-28T01:41:15+02:00",
+                "taxable":true,
+                "barcode":"",
+                "grams":0,
+                "image_id":null,
+                "weight":0.0,
+                "weight_unit":"kg",
+                "inventory_item_id":42761987326045,
+                "inventory_quantity":1,
+                "old_inventory_quantity":1,
+                "requires_shipping":true,
+                "admin_graphql_api_id":"gid:\/\/shopify\/ProductVariant\/40659070779485"
+            }
+        ],
+        "options":[
+            {
+                "id":8960729219165,
+                "product_id":6977060503645,
+                "name":"Title",
+                "position":1,
+                "values":["Default Title"]
+            }
+        ],
+        "images":[
+            {
+                "id":31926330818653,
+                "alt":"Assembly Chain Bracelet - Little Liffner",
+                "position":1,
+                "product_id":6977060503645,
+                "created_at":"2022-11-08T21:10:12+01:00",
+                "updated_at":"2023-08-18T08:07:27+02:00",
+                "admin_graphql_api_id":"gid:\/\/shopify\/ProductImage\/31926330818653",
+                "width":1000,
+                "height":1498,
+                "src":"https:\/\/cdn.shopify.com\/s\/files\/1\/0108\/5022\/products\/assembly-chain-bracelet-936449.jpg?v=1667938212",
+                "variant_ids":[]
+            },
+            {
+                "id":31926330949725,
+                "alt":"Assembly Chain Bracelet - Little Liffner",
+                "position":2,
+                "product_id":6977060503645,
+                "created_at":"2022-11-08T21:10:12+01:00",
+                "updated_at":"2023-08-18T08:07:27+02:00",
+                "admin_graphql_api_id":"gid:\/\/shopify\/ProductImage\/31926330949725",
+                "width":1000,
+                "height":1500,
+                "src":"https:\/\/cdn.shopify.com\/s\/files\/1\/0108\/5022\/products\/assembly-chain-bracelet-273230.jpg?v=1692275799",
+                "variant_ids":[]
+            }
+        ],
+        "image":{
+            "id":31926330818653,
+            "alt":"Assembly Chain Bracelet - Little Liffner",
+            "position":1,
+            "product_id":6977060503645,
+            "created_at":"2022-11-08T21:10:12+01:00",
+            "updated_at":"2023-08-18T08:07:27+02:00",
+            "admin_graphql_api_id":"gid:\/\/shopify\/ProductImage\/31926330818653",
+            "width":1000,
+            "height":1498,
+            "src":"https:\/\/cdn.shopify.com\/s\/files\/1\/0108\/5022\/products\/assembly-chain-bracelet-936449.jpg?v=1667938212",
+            "variant_ids":[]
+        }
+    }
+]

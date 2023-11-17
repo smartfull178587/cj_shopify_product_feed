@@ -89,7 +89,7 @@ function logToFile($txt) {
 	if (file_exists($log_file)) {
 		$log_file_handle = fopen($log_file, "a");
 	} else {
-		$log_file_handle = fopen($log_file, "w");
+		$log_file_handle = fopen($log_file, "w+");
 	}
 
 	$date = new DateTime();

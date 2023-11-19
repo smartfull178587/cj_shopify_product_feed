@@ -103,28 +103,38 @@ foreach ($products as $product) {
 		],
 	]);
 
-	echo 'start' . PHP_EOL;
-	echo $response;
-	echo 'end' . PHP_EOL;
-
-	$csv_result_sek .= $product['variants'][0]['sku'] . ',' .
-					   $product['title'] . ',' .
-					   $description . ',' .
-					   'https://www.littleliffner.com/products/'.$product['handle'] . ',' .
-					   $product['images'][0]['src'] . ',' .
-					   ($product['variants'][0]['inventory_quantity'] == 0 ? 'out of stock' : 'in stock') . ',' .
-					   $product['variants'][0]['price'] . ',' .
-					   'Little Liffner' . ',' .
-					   'no' . ',' .
-					   $condition . PHP_EOL;
+	$response_body = $response->getBody()->getContents();
+	$data = json_decode($response_body, true);
+	foreach ($data['data']['productVariant']['presentmentPrices']['nodes'] as $currency) {
+		$temp = $product['variants'][0]['sku'] . ',' .
+				$product['title'] . ',' .
+				$description . ',' .
+				'https://www.littleliffner.com/products/'.$product['handle'] . ',' .
+				$product['images'][0]['src'] . ',' .
+				($product['variants'][0]['inventory_quantity'] == 0 ? 'out of stock' : 'in stock') . ',' .
+				$currency['price']['amount'] . ',' .
+				'Little Liffner' . ',' .
+				'no' . ',' .
+				$condition . PHP_EOL;
+		if ($currency['price']['currencyCode'] == 'SEK') {
+			$csv_result_sek .= $temp;
+		}
+		elseif ($currency['price']['currencyCode'] == 'USD') {
+			$csv_result_usd .= $temp;
+		}
+		elseif ($currency['price']['currencyCode'] == 'EUR') {
+			$csv_result_eur .= $temp;
+		}
+	}
 }
 
 logToFile("ending making products detail");
 
 logToFile("beginning creating csv file");
 
-$file = 'product_feed.csv';
-file_put_contents($file, $csv_result);
+generateCSV('product_feed_sek.csv', $csv_result_sek);
+generateCSV('product_feed_usd.csv', $csv_result_usd);
+generateCSV('product_feed_eur.csv', $csv_result_eur);
 
 logToFile("ending creating csv file");
 

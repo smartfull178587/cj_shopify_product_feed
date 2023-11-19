@@ -16,4 +16,8 @@ function logToFile($txt) {
 	fclose($log_file_handle);
 }
 
+function generateCSV($filename, $content) {
+	file_put_contents($filename, $content);
+}
+
 ?>

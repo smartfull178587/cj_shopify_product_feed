@@ -1,7 +1,14 @@
 <?php
 
-logToFile("cronjob testing start");
+include 'helper.php';
+require_once 'vendor/autoload.php';
+
+use GuzzleHttp\Client;
+
+logToFile(" > api initializing");
+
 $curl = curl_init();
+$client = new Client();
 
 $store_name = 'littleliffner';
 $access_token = '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';
@@ -20,22 +27,30 @@ curl_setopt_array($curl, array(
 	),
 ));
 
+logToFile("send rest api request to get products");
+
 $response = curl_exec($curl);
+
+logToFile("receive response for the rest api request to get products");
 
 $data = json_decode($response, true);
 
 $products = $data['products'];
 
-$csv_result = 'id' . ',' . 
-				'title' . ',' .
-				'description' . ',' .
-				'link' . ',' .
-				'image_link' . ',' .
-				'availability' . ',' .
-				'price' . ',' .
-				'brand' . ',' .
-				'identifier_exists' . ',' .
-				'condition' . PHP_EOL;
+$csv_header = 'id' . ',' . 
+				  'title' . ',' .
+				  'description' . ',' .
+				  'link' . ',' .
+				  'image_link' . ',' .
+				  'availability' . ',' .
+				  'price' . ',' .
+				  'brand' . ',' .
+				  'identifier_exists' . ',' .
+				  'condition' . PHP_EOL;
+
+$csv_result_sek = $csv_result_eur = $csv_result_usd = $csv_header;
+
+logToFile("beginning making products detail");
 
 foreach ($products as $product) {
 	if ($product['status'] != 'active') continue;
@@ -63,39 +78,68 @@ foreach ($products as $product) {
 	$result = json_decode($response, true);
 	$condition = 'new';
 
-	$temp_line = $product['variants'][0]['sku'] . ',' .
-					$product['title'] . ',' .
-					$description . ',' .
-					'https://www.littleliffner.com/products/'.$product['handle'] . ',' .
-					$product['images'][0]['src'] . ',' .
-					($product['variants'][0]['inventory_quantity'] == 0 ? 'out of stock' : 'in stock') . ',' .
-					$product['variants'][0]['price'] . ',' .
-					'Little Liffner' . ',' .
-					'no' . ',' .
-					$condition . PHP_EOL;
-	$csv_result .= $temp_line;
+	$graphqlQuery = '
+		{
+			productVariant(id: "'. $product['variants'][0]['admin_graphql_api_id'] .'") {
+			presentmentPrices(first:10) {
+				nodes {
+					price {
+						amount
+						currencyCode
+					}
+				}
+			}
+			}
+		}
+	';
+
+	$response = $client->request('POST', 'https://'.$store_name.'.myshopify.com/admin/api/2023-10/graphql.json', [
+		'headers' => [
+			'Content-Type' => 'application/json',
+			'X-Shopify-Access-Token' => $access_token,
+		],
+		'json' => [
+			'query' => $graphqlQuery,
+		],
+	]);
+
+	$response_body = $response->getBody()->getContents();
+	$data = json_decode($response_body, true);
+	foreach ($data['data']['productVariant']['presentmentPrices']['nodes'] as $currency) {
+		$temp = $product['variants'][0]['sku'] . ',' .
+				$product['title'] . ',' .
+				$description . ',' .
+				'https://www.littleliffner.com/products/'.$product['handle'] . ',' .
+				$product['images'][0]['src'] . ',' .
+				($product['variants'][0]['inventory_quantity'] == 0 ? 'out of stock' : 'in stock') . ',' .
+				$currency['price']['amount'] . ',' .
+				'Little Liffner' . ',' .
+				'no' . ',' .
+				$condition . PHP_EOL;
+		if ($currency['price']['currencyCode'] == 'SEK') {
+			$csv_result_sek .= $temp;
+		}
+		elseif ($currency['price']['currencyCode'] == 'USD') {
+			$csv_result_usd .= $temp;
+		}
+		elseif ($currency['price']['currencyCode'] == 'EUR') {
+			$csv_result_eur .= $temp;
+		}
+	}
 }
 
-$file = 'product_feed.csv';
-file_put_contents($file, $csv_result);
-echo $csv_result;
+logToFile("ending making products detail");
+
+logToFile("beginning creating csv file");
+
+generateCSV('product_feed_sek.csv', $csv_result_sek);
+generateCSV('product_feed_usd.csv', $csv_result_usd);
+generateCSV('product_feed_eur.csv', $csv_result_eur);
+
+logToFile("ending creating csv file");
 
 curl_close($curl);
 
-logToFile("cronjob testing end");
+echo 'success!';
 
-function logToFile($txt) {
-	$log_file = "log_file.txt";
-	$log_file_handle = null;
-	if (file_exists($log_file)) {
-		$log_file_handle = fopen($log_file, "a");
-	} else {
-		$log_file_handle = fopen($log_file, "w");
-	}
-
-	$date = new DateTime();
-	$date = $date->format("y:m:d h:i:s");
-
-	fwrite($log_file_handle, '['.$date.'] '.$txt.PHP_EOL);
-	fclose($log_file_handle);
-}
+logToFile(" < api ending");

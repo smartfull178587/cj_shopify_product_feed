@@ -78,20 +78,29 @@ foreach ($products as $product) {
 	$result = json_decode($response, true);
 	$condition = 'new';
 
-	$graphqlQuery = '
-		{
-			productVariant(id: "'. $product['variants'][0]['admin_graphql_api_id'] .'") {
-			presentmentPrices(first:10) {
+	$query = <<<GQL
+		query ProductDetails($id: ID!) {
+			product(id: $id) {
+			variants(first: 1) {
 				nodes {
-					price {
-						amount
-						currencyCode
-					}
+				pricingInUSD: contextualPricing(context: { country: US }) {
+					price { amount currencyCode }
+				}
+				pricingInSEK: contextualPricing(context: { country: SE }) {
+					price { amount currencyCode }
+				}
+				pricingInEUR: contextualPricing(context: { country: DE }) {
+					price { amount currencyCode }
+				}
 				}
 			}
 			}
 		}
-	';
+	GQL;
+
+	$variables = json_encode([
+		"id" => "gid://shopify/Product/6977060503645"
+	]);
 
 	$response = $client->request('POST', 'https://'.$store_name.'.myshopify.com/admin/api/2023-10/graphql.json', [
 		'headers' => [
@@ -100,11 +109,14 @@ foreach ($products as $product) {
 		],
 		'json' => [
 			'query' => $graphqlQuery,
+			"variables" => $variables
 		],
 	]);
 
 	$response_body = $response->getBody()->getContents();
 	$data = json_decode($response_body, true);
+	echo $data;
+	exit;
 	foreach ($data['data']['productVariant']['presentmentPrices']['nodes'] as $currency) {
 		$temp = $product['variants'][0]['sku'] . ',' .
 				$product['title'] . ',' .

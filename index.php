@@ -78,7 +78,7 @@ foreach ($products as $product) {
 	$result = json_decode($response, true);
 	$condition = 'new';
 
-	$query = <<<GQL
+	$query = '
 		query ProductDetails($id: ID!) {
 			product(id: $id) {
 			variants(first: 1) {
@@ -96,11 +96,11 @@ foreach ($products as $product) {
 			}
 			}
 		}
-	GQL;
+	';
 
-	$variables = json_encode([
-		"id" => "gid://shopify/Product/6977060503645"
-	]);
+	$variables = [
+		"id" => $product['admin_graphql_api_id']
+	];
 
 	$response = $client->request('POST', 'https://'.$store_name.'.myshopify.com/admin/api/2023-10/graphql.json', [
 		'headers' => [
@@ -108,36 +108,44 @@ foreach ($products as $product) {
 			'X-Shopify-Access-Token' => $access_token,
 		],
 		'json' => [
-			'query' => $graphqlQuery,
+			'query' => $query,
 			"variables" => $variables
 		],
 	]);
 
 	$response_body = $response->getBody()->getContents();
 	$data = json_decode($response_body, true);
-	echo $data;
-	exit;
-	foreach ($data['data']['productVariant']['presentmentPrices']['nodes'] as $currency) {
-		$temp = $product['variants'][0]['sku'] . ',' .
-				$product['title'] . ',' .
-				$description . ',' .
-				'https://www.littleliffner.com/products/'.$product['handle'] . ',' .
-				$product['images'][0]['src'] . ',' .
-				($product['variants'][0]['inventory_quantity'] == 0 ? 'out of stock' : 'in stock') . ',' .
-				$currency['price']['amount'] . ',' .
-				'Little Liffner' . ',' .
-				'no' . ',' .
-				$condition . PHP_EOL;
-		if ($currency['price']['currencyCode'] == 'SEK') {
-			$csv_result_sek .= $temp;
-		}
-		elseif ($currency['price']['currencyCode'] == 'USD') {
-			$csv_result_usd .= $temp;
-		}
-		elseif ($currency['price']['currencyCode'] == 'EUR') {
-			$csv_result_eur .= $temp;
-		}
-	}
+
+	$csv_result_sek .= $product['variants'][0]['sku'] . ',' .
+						$product['title'] . ',' .
+						$description . ',' .
+						'https://www.littleliffner.com/products/'.$product['handle'] . ',' .
+						$product['images'][0]['src'] . ',' .
+						($product['variants'][0]['inventory_quantity'] == 0 ? 'out of stock' : 'in stock') . ',' .
+						$data['data']['product']['variants']['nodes'][0]['pricingInSEK']['price']['amount'] . ',' .
+						'Little Liffner' . ',' .
+						'no' . ',' .
+						$condition . PHP_EOL;
+	$csv_result_usd .= $product['variants'][0]['sku'] . ',' .
+					   $product['title'] . ',' .
+					   $description . ',' .
+					   'https://www.littleliffner.com/products/'.$product['handle'] . ',' .
+					   $product['images'][0]['src'] . ',' .
+					   ($product['variants'][0]['inventory_quantity'] == 0 ? 'out of stock' : 'in stock') . ',' .
+					   $data['data']['product']['variants']['nodes'][0]['pricingInUSD']['price']['amount'] . ',' .
+					   'Little Liffner' . ',' .
+					   'no' . ',' .
+					   $condition . PHP_EOL;
+	$csv_result_eur .= $product['variants'][0]['sku'] . ',' .
+					   $product['title'] . ',' .
+					   $description . ',' .
+					   'https://www.littleliffner.com/products/'.$product['handle'] . ',' .
+					   $product['images'][0]['src'] . ',' .
+					   ($product['variants'][0]['inventory_quantity'] == 0 ? 'out of stock' : 'in stock') . ',' .
+					   $data['data']['product']['variants']['nodes'][0]['pricingInEUR']['price']['amount'] . ',' .
+					   'Little Liffner' . ',' .
+					   'no' . ',' .
+					   $condition . PHP_EOL;
 }
 
 logToFile("ending making products detail");

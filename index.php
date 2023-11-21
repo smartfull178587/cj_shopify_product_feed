@@ -62,6 +62,9 @@ while(true) {
 	foreach ($products as $product) {
 		if ($product['status'] != 'active') continue;
 	
+		$title = str_replace(["\r", "\n", "\t"], '', $product['title']);
+		$title = str_replace('"', '""', $title);
+		$title = '"' . $title . '"';
 		$description = str_replace(["\r", "\n", "\t"], '', $product['body_html']);
 		$description = str_replace('"', '""', $description);
 		$description = '"' . $description . '"';
@@ -124,7 +127,7 @@ while(true) {
 		$data = json_decode($response_body, true);
 	
 		$csv_result_sek .= $product['variants'][0]['sku'] . ',' .
-							$product['title'] . ',' .
+							$title . ',' .
 							$description . ',' .
 							'https://www.littleliffner.com/products/'.$product['handle'] . ',' .
 							$product['images'][0]['src'] . ',' .
@@ -134,7 +137,7 @@ while(true) {
 							'no' . ',' .
 							$condition . PHP_EOL;
 		$csv_result_usd .= $product['variants'][0]['sku'] . ',' .
-						   $product['title'] . ',' .
+						   $title . ',' .
 						   $description . ',' .
 						   'https://www.littleliffner.com/products/'.$product['handle'] . ',' .
 						   $product['images'][0]['src'] . ',' .
@@ -144,7 +147,7 @@ while(true) {
 						   'no' . ',' .
 						   $condition . PHP_EOL;
 		$csv_result_eur .= $product['variants'][0]['sku'] . ',' .
-						   $product['title'] . ',' .
+						   $title . ',' .
 						   $description . ',' .
 						   'https://www.littleliffner.com/products/'.$product['handle'] . ',' .
 						   $product['images'][0]['src'] . ',' .

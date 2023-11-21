@@ -15,6 +15,19 @@ $access_token = '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';
 
 $since_id = 0;
 
+$csv_header = 'id' . ',' . 
+					  'title' . ',' .
+					  'description' . ',' .
+					  'link' . ',' .
+					  'image_link' . ',' .
+					  'availability' . ',' .
+					  'price' . ',' .
+					  'brand' . ',' .
+					  'identifier_exists' . ',' .
+					  'condition' . PHP_EOL;
+	
+$csv_result_sek = $csv_result_eur = $csv_result_usd = $csv_header;
+	
 while(true) {
 	curl_setopt_array($curl, array(
 		CURLOPT_URL => 'https://'.$store_name.'.myshopify.com/admin/api/2023-10/products.json?since_id=' . $since_id,
@@ -40,22 +53,11 @@ while(true) {
 	
 	$products = $data['products'];
 	
-	$csv_header = 'id' . ',' . 
-					  'title' . ',' .
-					  'description' . ',' .
-					  'link' . ',' .
-					  'image_link' . ',' .
-					  'availability' . ',' .
-					  'price' . ',' .
-					  'brand' . ',' .
-					  'identifier_exists' . ',' .
-					  'condition' . PHP_EOL;
-	
-	$csv_result_sek = $csv_result_eur = $csv_result_usd = $csv_header;
-	
 	logToFile("making products detail");
 	
-	if (count($products) == 0) break;
+	if (!count($products)) break;
+
+	$since_id = $products[count($products)-1]['id'];
 
 	foreach ($products as $product) {
 		if ($product['status'] != 'active') continue;
@@ -151,7 +153,6 @@ while(true) {
 						   'Little Liffner' . ',' .
 						   'no' . ',' .
 						   $condition . PHP_EOL;
-		$since_id = $product['id'];
 	}
 }
 

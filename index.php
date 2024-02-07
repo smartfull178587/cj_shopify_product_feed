@@ -11,13 +11,14 @@ $curl = curl_init();
 $client = new Client();
 
 $store_name = 'littleliffner';
-$access_token = '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';
+$access_token = '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';
 
 $since_id = 0;
 
 $csv_header = 'id' . ',' . 
 					  'title' . ',' .
 					  'description' . ',' .
+					  'google_product_category' . ',' .
 					  'link' . ',' .
 					  'image_link' . ',' .
 					  'availability' . ',' .
@@ -44,12 +45,12 @@ while(true) {
 	));
 	
 	logToFile("send rest api request to get products");
-	
 	$response = curl_exec($curl);
 	
 	logToFile("receive response for the rest api request to get products");
 	
 	$data = json_decode($response, true);
+
 	
 	$products = $data['products'];
 	
@@ -61,101 +62,98 @@ while(true) {
 
 	foreach ($products as $product) {
 		if ($product['status'] != 'active') continue;
-	
-		$title = str_replace(["\r", "\n", "\t"], '', $product['title']);
-		$title = str_replace('"', '""', $title);
-		$title = '"' . $title . '"';
-		$description = str_replace(["\r", "\n", "\t"], '', $product['body_html']);
-		$description = str_replace('"', '""', $description);
-		$description = '"' . $description . '"';
-	
-		// curl_setopt_array($curl, array(
-		// 	CURLOPT_URL => 'https://'.$store_name.'.myshopify.com/admin/api/2020-04/products/' . $product['id'] . '/metafields.json',
-		// 	CURLOPT_RETURNTRANSFER => true,
-		// 	CURLOPT_ENCODING => '',
-		// 	CURLOPT_MAXREDIRS => 10,
-		// 	CURLOPT_TIMEOUT => 0,
-		// 	CURLOPT_FOLLOWLOCATION => true,
-		// 	CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-		// 	CURLOPT_CUSTOMREQUEST => 'GET',
-		// 	CURLOPT_HTTPHEADER => array(
-		// 		'X-Shopify-Access-Token: '.$access_token
-		// 	),
-		// ));
-	
-		// $response = curl_exec($curl);
-	
-		// $result = json_decode($response, true);
-		$condition = 'new';
-	
-		$query = '
-			query ProductDetails($id: ID!) {
-				product(id: $id) {
-				variants(first: 1) {
-					nodes {
-					pricingInUSD: contextualPricing(context: { country: US }) {
-						price { amount currencyCode }
-					}
-					pricingInSEK: contextualPricing(context: { country: SE }) {
-						price { amount currencyCode }
-					}
-					pricingInEUR: contextualPricing(context: { country: DE }) {
-						price { amount currencyCode }
-					}
+		$index = 0;
+		foreach ($product['variants'] as $variant) {
+			$title = str_replace(["\r", "\n", "\t"], '', $product['title']);
+			$title = str_replace('"', '""', $title);
+			$title = '"' . $title . '"';
+			$description = str_replace(["\r", "\n", "\t"], '', $product['body_html']);
+			$description = str_replace('"', '""', $description);
+			$description = '"' . $description . '"';
+		
+			$condition = 'new';
+		
+			$query = '
+				query ProductDetails($id: ID!) {
+					product(id: $id) {
+						variants(first: 10) {
+							nodes {
+								pricingInUSD: contextualPricing(context: { country: US }) {
+									price { amount currencyCode }
+								}
+								pricingInSEK: contextualPricing(context: { country: SE }) {
+									price { amount currencyCode }
+								}
+								pricingInEUR: contextualPricing(context: { country: DE }) {
+									price { amount currencyCode }
+								}
+							}
+						}
+						productCategory {
+							productTaxonomyNode {
+								fullName
+							}
+						}
 					}
 				}
-				}
+			';
+			$variables = [
+				"id" => $product['admin_graphql_api_id']
+			];
+			$response = $client->request('POST', 'https://'.$store_name.'.myshopify.com/admin/api/2023-10/graphql.json', [
+				'headers' => [
+					'Content-Type' => 'application/json',
+					'X-Shopify-Access-Token' => $access_token,
+				],
+				'json' => [
+					'query' => $query,
+					"variables" => $variables
+				],
+			]);
+		
+			$response_body = $response->getBody()->getContents();
+			$data = json_decode($response_body, true);
+
+			$google_category = '';
+			if ($data['data']['product']['productCategory'] != null) {
+				$google_category = $data['data']['product']['productCategory']['productTaxonomyNode']['fullName'];
 			}
-		';
-	
-		$variables = [
-			"id" => $product['admin_graphql_api_id']
-		];
-	
-		$response = $client->request('POST', 'https://'.$store_name.'.myshopify.com/admin/api/2023-10/graphql.json', [
-			'headers' => [
-				'Content-Type' => 'application/json',
-				'X-Shopify-Access-Token' => $access_token,
-			],
-			'json' => [
-				'query' => $query,
-				"variables" => $variables
-			],
-		]);
-	
-		$response_body = $response->getBody()->getContents();
-		$data = json_decode($response_body, true);
-	
-		$csv_result_sek .= $product['variants'][0]['sku'] . ',' .
+
+			$csv_result_sek .= $product['variants'][$index]['sku'] . ',' .
 							$title . ',' .
 							$description . ',' .
-							'https://www.littleliffner.com/products/'.$product['handle'] . ',' .
+							$google_category . ',' .
+							'https://www.littleliffner.com/products/'.$product['handle'].'?variant='.$product['variants'][$index]['id'] . ',' .
 							$product['images'][0]['src'] . ',' .
-							($product['variants'][0]['inventory_quantity'] == 0 ? 'out of stock' : 'in stock') . ',' .
-							$data['data']['product']['variants']['nodes'][0]['pricingInSEK']['price']['amount'] . ',' .
+							($product['variants'][$index]['inventory_quantity'] == 0 ? 'out of stock' : 'in stock') . ',' .
+							$data['data']['product']['variants']['nodes'][$index]['pricingInSEK']['price']['amount'] . ',' .
 							'Little Liffner' . ',' .
 							'no' . ',' .
 							$condition . PHP_EOL;
-		$csv_result_usd .= $product['variants'][0]['sku'] . ',' .
-						   $title . ',' .
-						   $description . ',' .
-						   'https://www.littleliffner.com/products/'.$product['handle'] . ',' .
-						   $product['images'][0]['src'] . ',' .
-						   ($product['variants'][0]['inventory_quantity'] == 0 ? 'out of stock' : 'in stock') . ',' .
-						   $data['data']['product']['variants']['nodes'][0]['pricingInUSD']['price']['amount'] . ',' .
-						   'Little Liffner' . ',' .
-						   'no' . ',' .
-						   $condition . PHP_EOL;
-		$csv_result_eur .= $product['variants'][0]['sku'] . ',' .
-						   $title . ',' .
-						   $description . ',' .
-						   'https://www.littleliffner.com/products/'.$product['handle'] . ',' .
-						   $product['images'][0]['src'] . ',' .
-						   ($product['variants'][0]['inventory_quantity'] == 0 ? 'out of stock' : 'in stock') . ',' .
-						   $data['data']['product']['variants']['nodes'][0]['pricingInEUR']['price']['amount'] . ',' .
-						   'Little Liffner' . ',' .
-						   'no' . ',' .
-						   $condition . PHP_EOL;
+			$csv_result_usd .= $product['variants'][$index]['sku'] . ',' .
+   							$title . ',' .
+   							$description . ',' .
+							$google_category . ',' .
+							'https://www.littleliffner.com/products/'.$product['handle'].'?variant='.$product['variants'][$index]['id'] . ',' .
+   							$product['images'][0]['src'] . ',' .
+   							($product['variants'][$index]['inventory_quantity'] == 0 ? 'out of stock' : 'in stock') . ',' .
+   							$data['data']['product']['variants']['nodes'][$index]['pricingInUSD']['price']['amount'] . ',' .
+   							'Little Liffner' . ',' .
+   							'no' . ',' .
+   							$condition . PHP_EOL;
+			$csv_result_eur .= $product['variants'][$index]['sku'] . ',' .
+							$title . ',' .
+							$description . ',' .
+							$google_category . ',' .
+							'https://www.littleliffner.com/products/'.$product['handle'].'?variant='.$product['variants'][$index]['id'] . ',' .
+							$product['images'][0]['src'] . ',' .
+							($product['variants'][$index]['inventory_quantity'] == 0 ? 'out of stock' : 'in stock') . ',' .
+							$data['data']['product']['variants']['nodes'][$index]['pricingInEUR']['price']['amount'] . ',' .
+							'Little Liffner' . ',' .
+							'no' . ',' .
+							$condition . PHP_EOL;
+			$index++;
+		}
 	}
 }
 

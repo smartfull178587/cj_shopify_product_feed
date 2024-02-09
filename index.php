@@ -130,7 +130,7 @@ while(true) {
 							'Little Liffner' . ',' .
 							'no' . ',' .
 							$condition . PHP_EOL;
-			$csv_result_usd .= $product['variants'][$index]['sku'] . ',' .
+			$csv_result_usd .= $product['variants'][$index]['sku'] . '-' . $product['variants'][$index]['id'] . ',' .
    							$title . ',' .
    							$description . ',' .
 							$google_category . ',' .
@@ -141,7 +141,7 @@ while(true) {
    							'Little Liffner' . ',' .
    							'no' . ',' .
    							$condition . PHP_EOL;
-			$csv_result_eur .= $product['variants'][$index]['sku'] . ',' .
+			$csv_result_eur .= $product['variants'][$index]['sku'] . '-' . $product['variants'][$index]['id'] . ',' .
 							$title . ',' .
 							$description . ',' .
 							$google_category . ',' .

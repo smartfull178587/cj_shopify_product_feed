@@ -114,12 +114,12 @@ while(true) {
 			$response_body = $response->getBody()->getContents();
 			$data = json_decode($response_body, true);
 
-			$google_category = '';
+			$google_category = '""';
 			if ($data['data']['product']['productCategory'] != null) {
-				$google_category = $data['data']['product']['productCategory']['productTaxonomyNode']['fullName'];
+				$google_category = '"'.$data['data']['product']['productCategory']['productTaxonomyNode']['fullName'].'"';
 			}
 
-			$csv_result_sek .= $product['variants'][$index]['sku'] . ',' .
+			$csv_result_sek .= $product['variants'][$index]['sku'] . '-' . $product['variants'][$index]['id'] . ',' .
 							$title . ',' .
 							$description . ',' .
 							$google_category . ',' .

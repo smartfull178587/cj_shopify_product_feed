@@ -23,6 +23,7 @@ $csv_header = 'id' . ',' .
 					  'image_link' . ',' .
 					  'availability' . ',' .
 					  'price' . ',' .
+					  'size' . ',' .
 					  'brand' . ',' .
 					  'identifier_exists' . ',' .
 					  'condition' . PHP_EOL;
@@ -62,6 +63,15 @@ while(true) {
 
 	foreach ($products as $product) {
 		if ($product['status'] != 'active') continue;
+		$sizeOptionIndex = 0;
+		$flag = false;
+		foreach ($product['options'] as $option) {
+			$sizeOptionIndex++;
+			if ($option['name'] == 'Size') {
+				$flag = true;
+				break;
+			}
+		}
 		$index = 0;
 		foreach ($product['variants'] as $variant) {
 			$title = str_replace(["\r", "\n", "\t"], '', $product['title']);
@@ -70,6 +80,9 @@ while(true) {
 			$description = str_replace(["\r", "\n", "\t"], '', $product['body_html']);
 			$description = str_replace('"', '""', $description);
 			$description = '"' . $description . '"';
+			if ($flag)
+				$size = '"' . $variant['option'.$sizeOptionIndex] . '"';
+			else $size = '""';
 		
 			$condition = 'new';
 		
@@ -110,7 +123,7 @@ while(true) {
 					"variables" => $variables
 				],
 			]);
-		
+
 			$response_body = $response->getBody()->getContents();
 			$data = json_decode($response_body, true);
 
@@ -127,6 +140,7 @@ while(true) {
 							$product['images'][0]['src'] . ',' .
 							($product['variants'][$index]['inventory_quantity'] == 0 ? 'out of stock' : 'in stock') . ',' .
 							$data['data']['product']['variants']['nodes'][$index]['pricingInSEK']['price']['amount'] . ',' .
+							$size . ',' .
 							'Little Liffner' . ',' .
 							'no' . ',' .
 							$condition . PHP_EOL;
@@ -138,7 +152,8 @@ while(true) {
    							$product['images'][0]['src'] . ',' .
    							($product['variants'][$index]['inventory_quantity'] == 0 ? 'out of stock' : 'in stock') . ',' .
    							$data['data']['product']['variants']['nodes'][$index]['pricingInUSD']['price']['amount'] . ',' .
-   							'Little Liffner' . ',' .
+							$size . ',' .
+							'Little Liffner' . ',' .
    							'no' . ',' .
    							$condition . PHP_EOL;
 			$csv_result_eur .= $product['variants'][$index]['sku'] . '-' . $product['variants'][$index]['id'] . ',' .
@@ -149,6 +164,7 @@ while(true) {
 							$product['images'][0]['src'] . ',' .
 							($product['variants'][$index]['inventory_quantity'] == 0 ? 'out of stock' : 'in stock') . ',' .
 							$data['data']['product']['variants']['nodes'][$index]['pricingInEUR']['price']['amount'] . ',' .
+							$size . ',' .
 							'Little Liffner' . ',' .
 							'no' . ',' .
 							$condition . PHP_EOL;

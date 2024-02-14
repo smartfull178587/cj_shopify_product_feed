@@ -11,7 +11,7 @@ $curl = curl_init();
 $client = new Client();
 
 $store_name = 'littleliffner';
-$access_token = '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';
+$access_token = '';
 
 $since_id = 0;
 
